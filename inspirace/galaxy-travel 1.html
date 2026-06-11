@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktická Mapa – Cestování</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ─── TOP OVERLAY ─── */
+        #top-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 14px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        #top-overlay .sector-label {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0,255,255,0.6);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #planet-pills {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 1 1 460px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        /* Planet pills in top bar */
+        .planet-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            min-width: 150px;
+            background: linear-gradient(160deg, rgba(0,16,40,0.86), rgba(0,6,18,0.74));
+            border: 1px solid rgba(0,170,255,0.25);
+            border-radius: 18px;
+            padding: 10px 14px 10px 10px;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            color: #aabbee;
+            transition: border-color 0.35s, box-shadow 0.35s, color 0.35s, transform 0.35s;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 18px rgba(0,100,180,0.07);
+        }
+
+        .planet-pill.active {
+            border-color: rgba(255,255,255,0.7);
+            color: #fff;
+            box-shadow: 0 0 22px rgba(255,255,255,0.14), 0 0 36px rgba(0,220,255,0.16);
+            transform: translateY(2px);
+        }
+
+        .planet-pill.nearby {
+            border-color: #00ffff;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(0,255,255,0.35);
+        }
+
+        .planet-pill.reached {
+            border-color: #00ff88;
+            color: #00ff88;
+            box-shadow: 0 0 14px rgba(0,255,136,0.40);
+        }
+
+        .planet-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .pill-topline,
+        .pill-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .pill-topline {
+            gap: 10px;
+        }
+
+        .pill-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+        }
+
+        .pill-status {
+            color: #7ca0cb;
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .pill-dist {
+            font-size: 0.6rem;
+            color: #88aaff;
+            margin-left: auto;
+        }
+
+        .pill-meter {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,25,45,0.85);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .pill-meter-fill {
+            height: 100%;
+            width: 10%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(0,120,255,0.75), rgba(0,255,255,0.95));
+            box-shadow: 0 0 12px rgba(0,255,255,0.45);
+            transition: width 0.18s ease;
+        }
+
+        /* arrow separator */
+        .pill-sep {
+            color: rgba(0,170,255,0.3);
+            font-size: 1rem;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        #target-card {
+            min-width: 220px;
+            margin-left: auto;
+            padding: 10px 14px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(0,255,255,0.28);
+            background: linear-gradient(160deg, rgba(0,18,36,0.88), rgba(0,5,14,0.8));
+            box-shadow: inset 0 0 30px rgba(0,180,255,0.06), 0 0 28px rgba(0,100,255,0.08);
+        }
+
+        .target-kicker {
+            font-size: 0.52rem;
+            letter-spacing: 3px;
+            color: #6a92c2;
+            margin-bottom: 4px;
+        }
+
+        .target-name {
+            font-size: 1rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .target-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.58rem;
+            letter-spacing: 1.6px;
+            color: #8eb7e2;
+            text-transform: uppercase;
+        }
+
+        .target-bar {
+            margin-top: 8px;
+            height: 6px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(0,30,54,0.9);
+        }
+
+        .target-bar-fill {
+            height: 100%;
+            width: 6%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #0077ff, #00ffff);
+            box-shadow: 0 0 18px rgba(0,255,255,0.45);
+            transition: width 0.18s ease;
+        }
+
+        @media (max-width: 900px) {
+            #target-card {
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+
+        /* ─── HUD corners ─── */
+        #hud {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .hud-panel {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(0,10,30,0.85), rgba(0,0,0,0.9));
+            border: 1px solid rgba(0,170,255,0.4);
+            border-radius: 10px;
+            padding: 10px 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 18px rgba(0,170,255,0.15);
+        }
+
+        #hud-tl { top: 70px; left: 20px; min-width: 130px; }
+        #hud-tr { top: 70px; right: 20px; text-align: right; }
+
+        .hud-label {
+            color: #88aaff;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+        }
+
+        .hud-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00ffff;
+            text-shadow: 0 0 8px rgba(0,255,255,0.5);
+        }
+
+        /* ─── Speed bar ─── */
+        .speed-bar-wrap {
+            width: 120px;
+            height: 6px;
+            background: rgba(0,20,40,0.8);
+            border: 1px solid rgba(0,170,255,0.4);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .speed-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0044ff, #00ffff);
+            box-shadow: 0 0 8px rgba(0,255,255,0.5);
+            transition: width 0.15s ease;
+        }
+
+        /* ─── Mission panel (right side, appears when in orbit) ─── */
+        #mission-panel {
+            position: fixed;
+            right: -420px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 380px;
+            background: linear-gradient(135deg, rgba(5,20,50,0.96), rgba(0,5,18,0.98));
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 20px 0 0 20px;
+            padding: 32px 28px;
+            z-index: 300;
+            pointer-events: auto;
+            transition: right 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: -10px 0 60px rgba(0,0,0,0.7), 0 0 30px rgba(0,100,255,0.1);
+        }
+
+        #mission-panel.open {
+            right: 0;
+        }
+
+        .mp-planet-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mp-planet-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        .mp-orbit-badge {
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: #00ff88;
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.4);
+            padding: 3px 10px;
+            border-radius: 40px;
+            animation: orbit-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes orbit-pulse {
+            0%,100% { box-shadow: 0 0 6px rgba(0,255,136,0.3); }
+            50% { box-shadow: 0 0 20px rgba(0,255,136,0.7); }
+        }
+
+        .mp-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .mp-desc {
+            font-size: 0.82rem;
+            color: #aabbdd;
+            line-height: 1.65;
+            margin-bottom: 22px;
+        }
+
+        .mp-stats {
+            margin-bottom: 24px;
+        }
+
+        .mp-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            margin-bottom: 9px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid rgba(0,100,200,0.15);
+        }
+
+        .mp-stat-row:last-child { border-bottom: none; }
+        .mp-stat-label { color: #5577aa; text-transform: uppercase; letter-spacing: 1px; }
+        .mp-stat-val { font-weight: 700; }
+
+        .launch-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #0066cc, #00ddff);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 30px rgba(0,200,255,0.4);
+        }
+
+        .launch-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 50px rgba(0,255,255,0.65);
+            filter: brightness(1.15);
+        }
+
+        /* ─── Approach indicator (center screen) ─── */
+        #approach-indicator {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,5,20,0.85);
+            border: 1px solid rgba(0,255,255,0.5);
+            border-radius: 40px;
+            padding: 10px 24px;
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            color: #00ffff;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 0 20px rgba(0,255,255,0.25);
+            transition: opacity 0.4s ease;
+            text-align: center;
+        }
+
+        #approach-indicator.visible {
+            opacity: 1;
+        }
+
+        /* ─── Damage flash ─── */
+        #damage-flash {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(255,0,0,0.25);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 500;
+            transition: opacity 0.1s;
+        }
+
+        #damage-flash.on { opacity: 1; }
+
+        /* ─── Mobile joystick ─── */
+        #mobile-controls {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%; height: 200px;
+            pointer-events: none;
+            z-index: 150;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-controls { display: block; }
+        }
+
+        .joystick-base {
+            position: absolute;
+            bottom: 30px; left: 30px;
+            width: 120px; height: 120px;
+            border: 2px solid rgba(0,170,255,0.5);
+            border-radius: 50%;
+            background: rgba(0,20,40,0.6);
+            pointer-events: all;
+        }
+
+        .joystick-knob {
+            position: absolute;
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, #00ffff, #0088aa);
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(0,255,255,0.6);
+        }
+
+        /* ─── Controls hint ─── */
+        #controls-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,10,25,0.75);
+            border: 1px solid rgba(0,100,200,0.3);
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 0.62rem;
+            color: #5577aa;
+            letter-spacing: 1px;
+            pointer-events: none;
+            z-index: 100;
+            line-height: 1.8;
+        }
+
+        .ch-key {
+            display: inline-block;
+            background: rgba(0,150,255,0.15);
+            border: 1px solid rgba(0,150,255,0.4);
+            color: #00aaff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.58rem;
+            margin-right: 4px;
+        }
+
+        /* ─── Loading ─── */
+        #loader {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        .loader-ring {
+            width: 80px; height: 80px;
+            border: 3px solid transparent;
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loader-text {
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: #00ffff;
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%,100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* ─── Orbit ring animation overlay on canvas ─── */
+        .orbit-reached-fx {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px; height: 300px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 200;
+            animation: none;
+        }
+
+        .orbit-reached-fx.play {
+            animation: orbit-fx 1s ease-out forwards;
+        }
+
+        @keyframes orbit-fx {
+            0% { opacity: 1; transform: translate(-50%,-50%) scale(0.3); }
+            100% { opacity: 0; transform: translate(-50%,-50%) scale(1.5); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="damage-flash"></div>
+
+    <!-- Loading -->
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">INICIALIZACE NAVIGACE</div>
+    </div>
+
+    <!-- TOP OVERLAY: sector label + planet pills -->
+    <div id="top-overlay">
+        <div class="sector-label">SEKTOR: AURORA-7</div>
+        <span class="pill-sep">›</span>
+        <!-- Dynamically generated planet pills go here -->
+        <div id="planet-pills"></div>
+        <div id="target-card">
+            <div class="target-kicker">NAV LOCK</div>
+            <div class="target-name" id="target-name">—</div>
+            <div class="target-meta">
+                <span id="target-status">Hledání</span>
+                <span id="target-bearing">—</span>
+            </div>
+            <div class="target-bar">
+                <div class="target-bar-fill" id="target-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD corners -->
+    <div id="hud">
+        <div class="hud-panel" id="hud-tl">
+            <div class="hud-label">Rychlost</div>
+            <div class="hud-value" id="speed-val">0</div>
+            <div class="speed-bar-wrap">
+                <div class="speed-bar-fill" id="speed-bar" style="width:0%"></div>
+            </div>
+        </div>
+        <div class="hud-panel" id="hud-tr">
+            <div class="hud-label">Nejbližší planeta</div>
+            <div class="hud-value" id="nearest-name">—</div>
+            <div style="font-size:0.65rem; color:#5577aa; margin-top:3px;" id="nearest-dist">—</div>
+        </div>
+    </div>
+
+    <!-- Approach indicator (bottom center) -->
+    <div id="approach-indicator">
+        <span id="approach-text">ORBIT DOSAŽENA – PŘISTÁNÍ POVOLENO</span>
+    </div>
+
+    <!-- Mission panel (slides from right) -->
+    <div id="mission-panel">
+        <div class="mp-planet-indicator">
+            <div class="mp-planet-dot" id="mp-dot"></div>
+            <div class="mp-orbit-badge">▸ ORBIT DOSAŽENA</div>
+        </div>
+        <div class="mp-title" id="mp-title">PLANETA X</div>
+        <p class="mp-desc" id="mp-desc">Popis mise bude zobrazen zde.</p>
+        <div class="mp-stats" id="mp-stats"></div>
+        <button class="launch-btn" id="launch-btn">⟶ ZAHÁJIT MISI</button>
+    </div>
+
+    <!-- Mobile controls -->
+    <div id="mobile-controls">
+        <div class="joystick-base" id="joystickBase">
+            <div class="joystick-knob" id="joystickKnob"></div>
+        </div>
+    </div>
+
+    <!-- Controls hint -->
+    <div id="controls-hint">
+        <span class="ch-key">A D</span> / <span class="ch-key">← →</span> otáčení<br>
+        <span class="ch-key">W S</span> / <span class="ch-key">↑ ↓</span> výška<br>
+        <span class="ch-key">SHIFT / CTRL</span> vpřed / vzad<br>
+        <span class="ch-key">SPACE</span> brzda / stop<br>
+        <span class="ch-key">ESC</span> zavřít panel
+    </div>
+
+    <!-- Orbit FX overlay -->
+    <div class="orbit-reached-fx" id="orbit-fx"></div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ─────────────────────────────────────────────────────────
+        //  PLANET DEFINITIONS
+        // ─────────────────────────────────────────────────────────
+        const PLANETS = [
+            {
+                name: 'AETERNA',
+                hexColor: '#0088ff',
+                threeColor: 0x0088ff,
+                emissive: 0x002244,
+                size: 22,
+                worldPos: new THREE.Vector3(-900, 300, -1800),
+                orbitRadius: 160,          // world-units; must reach this close to trigger
+                desc: 'Modrá plynná planeta sloužící jako primární těžební uzel. Silné bouře a magnetické anomálie.',
+                diff: '★★☆☆☆',
+                diffColor: '#00aaff',
+                reward: '400 CR',
+                type: 'CORRIDOR RUN',
+                mapIndex: 0,
+                hasRings: true,
+            },
+            {
+                name: 'PYRROS',
+                hexColor: '#ff4400',
+                threeColor: 0xff4400,
+                emissive: 0x440800,
+                size: 18,
+                worldPos: new THREE.Vector3(1100, -400, -3200),
+                orbitRadius: 180,
+                desc: 'Pekelný svět pokrytý vulkány. Vysoká koncentrace nepřátelských dronů a obranných věží.',
+                diff: '★★★☆☆',
+                diffColor: '#ffaa00',
+                reward: '750 CR',
+                type: 'CORRIDOR RUN',
+                mapIndex: 1,
+                hasRings: false,
+            },
+            {
+                name: 'VOID-ZERO',
+                hexColor: '#9900ff',
+                threeColor: 0x9900ff,
+                emissive: 0x220033,
+                size: 30,
+                worldPos: new THREE.Vector3(-200, 500, -5500),
+                orbitRadius: 240,
+                desc: 'Temné jádro sektoru. Domov Jádra Prázdnoty. Pouze pro zkušené piloty. Neodpouštějící prostředí.',
+                diff: '★★★★★',
+                diffColor: '#ff0055',
+                reward: '2 500 CR',
+                type: 'BOSS CORRIDOR',
+                mapIndex: 2,
+                hasRings: false,
+            },
+        ];
+
+        // State per planet
+        const planetState = PLANETS.map(() => ({ reached: false, nearby: false }));
+
+        // ─────────────────────────────────────────────────────────
+        //  SCENE SETUP
+        // ─────────────────────────────────────────────────────────
+        const canvas = document.getElementById('gameCanvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000508);
+        scene.fog = new THREE.Fog(0x000508, 200, 1800);
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 8000);
+        camera.position.set(0, 4, 14);
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0x112244, 0.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        const shipLight = new THREE.PointLight(0x00aaff, 4, 40);
+        shipLight.position.set(0, 2, 8);
+        scene.add(shipLight);
+
+        // ─────────────────────────────────────────────────────────
+        //  STARFIELD (tunnel style like spaceInvaders)
+        // ─────────────────────────────────────────────────────────
+        function buildStarfield() {
+            const geo = new THREE.BufferGeometry();
+            const count = 3600;
+            const pos = new Float32Array(count * 3);
+            const col = new Float32Array(count * 3);
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                pos[i3]     = (Math.random() - 0.5) * 360;
+                pos[i3 + 1] = (Math.random() - 0.5) * 360;
+                pos[i3 + 2] = (Math.random() - 0.5) * 360;
+                const b = 0.4 + Math.random() * 0.6;
+                col[i3] = b; col[i3+1] = b; col[i3+2] = b;
+            }
+
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+
+            const mat = new THREE.PointsMaterial({
+                size: 0.75, vertexColors: true,
+                transparent: true, opacity: 0.85, sizeAttenuation: true
+            });
+            const stars = new THREE.Points(geo, mat);
+            scene.add(stars);
+            return stars;
+        }
+
+        const starfield = buildStarfield();
+
+        // ─────────────────────────────────────────────────────────
+        //  PLANET MESHES
+        // ─────────────────────────────────────────────────────────
+        const planetMeshes = [];
+
+        PLANETS.forEach((pd, i) => {
+            const group = new THREE.Group();
+
+            const geo = new THREE.SphereGeometry(pd.size, 48, 48);
+            const mat = new THREE.MeshStandardMaterial({
+                color: pd.threeColor,
+                emissive: pd.emissive,
+                emissiveIntensity: 0.6,
+                roughness: 0.75,
+                metalness: 0.2,
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            group.add(mesh);
+
+            // Glow sprite (approximated with sprite)
+            const glowMat = new THREE.SpriteMaterial({
+                color: pd.threeColor, transparent: true, opacity: 0.18,
+                depthWrite: false,
+            });
+            const glow = new THREE.Sprite(glowMat);
+            glow.scale.set(pd.size * 5, pd.size * 5, 1);
+            group.add(glow);
+
+            // Rings (for AETERNA)
+            if (pd.hasRings) {
+                const ringGeo = new THREE.RingGeometry(pd.size + 4, pd.size + 10, 80);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: pd.threeColor, transparent: true, opacity: 0.22,
+                    side: THREE.DoubleSide,
+                });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2.3;
+                group.add(ring);
+            }
+
+            // Orbit ring (the dashed circle the player needs to breach)
+            const orbitGeo = new THREE.RingGeometry(pd.orbitRadius - 1, pd.orbitRadius + 1, 128);
+            const orbitMat = new THREE.MeshBasicMaterial({
+                color: 0x00ff88, transparent: true, opacity: 0.06,
+                side: THREE.DoubleSide,
+            });
+            const orbitRing = new THREE.Mesh(orbitGeo, orbitMat);
+            orbitRing.rotation.x = Math.PI / 2;
+            group.add(orbitRing);
+            group._orbitRing = orbitRing;
+            group._orbitMat = orbitMat;
+
+            // Atmosphere pulse (animated)
+            const atmGeo = new THREE.SphereGeometry(pd.size + 2, 32, 32);
+            const atmMat = new THREE.MeshBasicMaterial({
+                color: pd.threeColor, transparent: true, opacity: 0.08,
+                side: THREE.BackSide, depthWrite: false,
+            });
+            const atm = new THREE.Mesh(atmGeo, atmMat);
+            group.add(atm);
+            group._atm = atm;
+            group._atmMat = atmMat;
+
+            group.position.copy(pd.worldPos);
+            scene.add(group);
+            planetMeshes.push(group);
+        });
+
+        // ─────────────────────────────────────────────────────────
+        //  DISTANT NEBULAE (great depth cues)
+        // ─────────────────────────────────────────────────────────
+        function buildNebula(x, y, z, color, radius) {
+            const pts = [];
+            for (let i = 0; i < 600; i++) {
+                const r = Math.random() * radius;
+                const theta = Math.random() * Math.PI * 2;
+                const phi   = Math.acos(2 * Math.random() - 1);
+                pts.push(
+                    r * Math.sin(phi) * Math.cos(theta) + x,
+                    r * Math.sin(phi) * Math.sin(theta) * 0.4 + y,
+                    r * Math.cos(phi) + z
+                );
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+            const mat = new THREE.PointsMaterial({
+                color, size: 3, transparent: true, opacity: 0.25, depthWrite: false,
+            });
+            scene.add(new THREE.Points(geo, mat));
+        }
+
+        buildNebula(-600, 200, -2400, 0x0044ff, 400);
+        buildNebula(900, -100, -4000, 0xff2200, 350);
+        buildNebula(-100, 80, -5200, 0x6600cc, 500);
+
+        // ─────────────────────────────────────────────────────────
+        //  ASTEROID OBSTACLES
+        // ─────────────────────────────────────────────────────────
+        const obstacles = [];
+        const debrisTypes = [
+            {
+                type: 'asteroid',
+                count: 120,
+                geometry: new THREE.DodecahedronGeometry(1, 1),
+                material: new THREE.MeshStandardMaterial({
+                    color: 0x4a4f58,
+                    roughness: 0.95,
+                    metalness: 0.08,
+                    flatShading: true,
+                }),
+                sizeMin: 16,
+                sizeMax: 42,
+                radiusMul: 0.68,
+            },
+            {
+                type: 'shard',
+                count: 90,
+                geometry: new THREE.TetrahedronGeometry(1.3, 0),
+                material: new THREE.MeshStandardMaterial({
+                    color: 0x7dbaff,
+                    emissive: 0x0b2b5a,
+                    emissiveIntensity: 0.4,
+                    roughness: 0.35,
+                    metalness: 0.25,
+                    flatShading: true,
+                }),
+                sizeMin: 7,
+                sizeMax: 18,
+                radiusMul: 0.55,
+            },
+            {
+                type: 'scrap',
+                count: 80,
+                geometry: new THREE.BoxGeometry(1.8, 0.35, 1.15),
+                material: new THREE.MeshStandardMaterial({
+                    color: 0x7a8da8,
+                    emissive: 0x14263a,
+                    emissiveIntensity: 0.3,
+                    roughness: 0.45,
+                    metalness: 0.72,
+                }),
+                sizeMin: 8,
+                sizeMax: 20,
+                radiusMul: 0.48,
+            },
+            {
+                type: 'wreck',
+                count: 60,
+                geometry: new THREE.CylinderGeometry(0.45, 0.9, 2.4, 7, 1, false),
+                material: new THREE.MeshStandardMaterial({
+                    color: 0x8f7058,
+                    emissive: 0x2a1208,
+                    emissiveIntensity: 0.2,
+                    roughness: 0.62,
+                    metalness: 0.48,
+                }),
+                sizeMin: 10,
+                sizeMax: 24,
+                radiusMul: 0.52,
+            },
+        ];
+
+        function randomDebrisWorldPos() {
+            return new THREE.Vector3(
+                (Math.random() - 0.5) * 5400,
+                (Math.random() - 0.5) * 3400,
+                -400 - Math.random() * 8200
+            );
+        }
+
+        debrisTypes.forEach(def => {
+            for (let i = 0; i < def.count; i++) {
+                const mesh = new THREE.Mesh(def.geometry, def.material);
+                const size = def.sizeMin + Math.random() * (def.sizeMax - def.sizeMin);
+                const pos = randomDebrisWorldPos();
+
+                mesh.scale.set(size, size, size);
+                mesh.position.copy(pos);
+
+                if (def.type === 'scrap') {
+                    mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                } else if (def.type === 'wreck') {
+                    mesh.rotation.z = Math.PI * 0.5;
+                    mesh.rotation.x = Math.random() * Math.PI;
+                }
+
+                mesh.userData = {
+                    worldPos: pos.clone(),
+                    radius: size * def.radiusMul,
+                    rotX: (Math.random() - 0.5) * 0.03,
+                    rotY: (Math.random() - 0.5) * 0.03,
+                    rotZ: (Math.random() - 0.5) * 0.02,
+                    waveAmpX: Math.random() * 14,
+                    waveAmpY: Math.random() * 12,
+                    waveSpeed: 0.3 + Math.random() * 0.8,
+                    waveOffset: Math.random() * Math.PI * 2,
+                };
+
+                scene.add(mesh);
+                obstacles.push(mesh);
+            }
+        });
+
+        // ─────────────────────────────────────────────────────────
+        //  PLAYER SHIP
+        // ─────────────────────────────────────────────────────────
+        function buildShip() {
+            const group = new THREE.Group();
+
+            // Body
+            const bodyGeo = new THREE.ConeGeometry(0.8, 2.2, 6);
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: 0x0088ff, emissive: 0x0044aa, emissiveIntensity: 0.8,
+                metalness: 0.85, roughness: 0.15,
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.rotation.x = Math.PI / 2;
+            group.add(body);
+
+            // Wings
+            const wingMat = new THREE.MeshStandardMaterial({
+                color: 0x0055bb, emissive: 0x001133, emissiveIntensity: 0.5, metalness: 0.9,
+            });
+            [-1, 1].forEach(side => {
+                const wGeo = new THREE.BoxGeometry(2.4, 0.12, 1);
+                const wing = new THREE.Mesh(wGeo, wingMat);
+                wing.position.set(side * 1.1, 0, 0.2);
+                group.add(wing);
+            });
+
+            // Engine exhaust glow
+            const engGeo = new THREE.ConeGeometry(0.38, 0.9, 8);
+            const engMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.85 });
+            const eng = new THREE.Mesh(engGeo, engMat);
+            eng.position.set(0, 0, 1.2);
+            eng.rotation.x = Math.PI;
+            group.add(eng);
+            group._engine = eng;
+
+            // Shield sphere (hidden)
+            const shGeo = new THREE.SphereGeometry(1.8, 16, 16);
+            const shMat = new THREE.MeshBasicMaterial({
+                color: 0x0088ff, transparent: true, opacity: 0, wireframe: true,
+            });
+            group._shield = new THREE.Mesh(shGeo, shMat);
+            group.add(group._shield);
+
+            group.position.set(0, 0, 0);
+            scene.add(group);
+            return group;
+        }
+
+        const ship = buildShip();
+        ship.targetX = 0;
+        ship.targetY = 0;
+
+        // ─────────────────────────────────────────────────────────
+        //  WORLD TRAVEL STATE
+        // ─────────────────────────────────────────────────────────
+        const travel = {
+            worldPos: new THREE.Vector3(0, 0, 0),
+            velocity: new THREE.Vector3(),
+            speed: 0,
+            inputX: 0,
+            inputY: 0,
+            yaw: 0,
+            pitch: 0,
+            yawVelocity: 0,
+            pitchVelocity: 0,
+            strafeThrust: 210,
+            forwardThrust: 260,
+            reverseThrust: 180,
+            maxForwardSpeed: 260,
+            maxReverseSpeed: 160,
+            maxStrafeSpeed: 220,
+            drag: 2.2,
+            brakeDrag: 6.5,
+            turnAccel: 2.8,
+            turnDamping: 5.2,
+            maxTurnSpeed: 2.5,
+        };
+
+        // ─────────────────────────────────────────────────────────
+        //  INPUT
+        // ─────────────────────────────────────────────────────────
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === 'Escape') closeMissionPanel();
+        });
+        window.addEventListener('keyup', e => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Mobile joystick
+        const jBase = document.getElementById('joystickBase');
+        const jKnob = document.getElementById('joystickKnob');
+        let jActive = false, jTouchId = null;
+
+        const handleJoy = (cx, cy) => {
+            const rect = jBase.getBoundingClientRect();
+            const dx = cx - (rect.left + rect.width / 2);
+            const dy = cy - (rect.top + rect.height / 2);
+            const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 50);
+            const ang = Math.atan2(dy, dx);
+            jKnob.style.transform = `translate(${Math.cos(ang)*dist - 25}px, ${Math.sin(ang)*dist - 25}px)`;
+            const normalizedDist = dist / 50;
+            const joyX = Math.cos(ang) * normalizedDist;
+            const joyY = Math.sin(ang) * normalizedDist;
+            keys['arrowleft']  = joyX < -0.18;
+            keys['arrowright'] = joyX > 0.18;
+            keys['arrowup']    = joyY < -0.18;
+            keys['arrowdown']  = joyY > 0.18;
+        };
+
+        jBase.addEventListener('touchstart', e => {
+            e.preventDefault(); jActive = true;
+            jTouchId = e.touches[0].identifier;
+            handleJoy(e.touches[0].clientX, e.touches[0].clientY);
+        });
+        window.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!jActive) return;
+            for (const t of e.touches) {
+                if (t.identifier === jTouchId) { handleJoy(t.clientX, t.clientY); break; }
+            }
+        }, { passive: false });
+        window.addEventListener('touchend', () => {
+            if (jActive) {
+                jActive = false;
+                jKnob.style.transform = 'translate(-50%,-50%)';
+                ['arrowleft','arrowright','arrowup','arrowdown'].forEach(k => keys[k] = false);
+            }
+        });
+
+        function getOrientationVectors() {
+            const forward = new THREE.Vector3(
+                Math.sin(travel.yaw) * Math.cos(travel.pitch),
+                Math.sin(travel.pitch),
+                -Math.cos(travel.yaw) * Math.cos(travel.pitch)
+            ).normalize();
+
+            const worldUp = new THREE.Vector3(0, 1, 0);
+            const right = new THREE.Vector3().crossVectors(forward, worldUp).normalize();
+            const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+
+            return { forward, right, up };
+        }
+
+        function recycleDebris(mesh, forward, right, up) {
+            const ahead = 900 + Math.random() * 4200;
+            const side = (Math.random() - 0.5) * 2600;
+            const lift = (Math.random() - 0.5) * 1800;
+
+            mesh.userData.worldPos.copy(travel.worldPos)
+                .addScaledVector(forward, ahead)
+                .addScaledVector(right, side)
+                .addScaledVector(up, lift);
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  UI HELPERS
+        // ─────────────────────────────────────────────────────────
+        let activeMissionPlanetIdx = null;
+
+        function buildPillsUI() {
+            const container = document.getElementById('planet-pills');
+            container.innerHTML = '';
+            PLANETS.forEach((pd, i) => {
+                const pill = document.createElement('div');
+                pill.className = 'planet-pill';
+                pill.id = `pill-${i}`;
+
+                const dot = document.createElement('div');
+                dot.className = 'planet-dot';
+                dot.style.background = pd.hexColor;
+                dot.style.boxShadow = `0 0 6px ${pd.hexColor}`;
+
+                const name = document.createElement('span');
+                name.className = 'pill-name';
+                name.textContent = pd.name;
+
+                const top = document.createElement('div');
+                top.className = 'pill-topline';
+                top.append(dot, name);
+
+                const status = document.createElement('span');
+                status.className = 'pill-status';
+                status.id = `pill-status-${i}`;
+                status.textContent = 'DEEP SPACE';
+
+                const dist = document.createElement('span');
+                dist.className = 'pill-dist';
+                dist.id = `pill-dist-${i}`;
+                dist.textContent = '—';
+
+                const meta = document.createElement('div');
+                meta.className = 'pill-meta';
+                meta.append(status, dist);
+
+                const meter = document.createElement('div');
+                meter.className = 'pill-meter';
+                const meterFill = document.createElement('div');
+                meterFill.className = 'pill-meter-fill';
+                meterFill.id = `pill-meter-${i}`;
+                meter.appendChild(meterFill);
+
+                pill.append(top, meta, meter);
+                container.appendChild(pill);
+
+                if (i < PLANETS.length - 1) {
+                    const sep = document.createElement('span');
+                    sep.className = 'pill-sep';
+                    sep.textContent = '›';
+                    container.appendChild(sep);
+                }
+            });
+        }
+
+        buildPillsUI();
+
+        function getApproachRatio(pd, dist) {
+            return THREE.MathUtils.clamp(1 - dist / (pd.orbitRadius * 6), 0.04, 1);
+        }
+
+        function getBearingText(relativePos) {
+            const parts = [];
+
+            if (relativePos.x < -120) parts.push('PORT');
+            if (relativePos.x > 120) parts.push('STARBOARD');
+            if (relativePos.y > 120) parts.push('HIGH');
+            if (relativePos.y < -120) parts.push('LOW');
+
+            if (!parts.length) {
+                return relativePos.z < -220 ? 'AHEAD' : 'LOCKED';
+            }
+
+            return parts.join(' / ');
+        }
+
+        function updateTargetCard(pd, dist, relativePos, reached) {
+            document.getElementById('target-name').textContent = pd.name;
+            document.getElementById('target-status').textContent =
+                reached ? 'ORBIT READY' : dist < pd.orbitRadius * 1.8 ? 'CLOSE APPROACH' : 'LONG RANGE';
+            document.getElementById('target-bearing').textContent = getBearingText(relativePos);
+            document.getElementById('target-bar-fill').style.width = `${getApproachRatio(pd, dist) * 100}%`;
+        }
+
+        function updatePills(shipWorldPos, nearestIdx) {
+            PLANETS.forEach((pd, i) => {
+                const dist = shipWorldPos.distanceTo(pd.worldPos);
+                const pill = document.getElementById(`pill-${i}`);
+                const pillDist = document.getElementById(`pill-dist-${i}`);
+                const pillStatus = document.getElementById(`pill-status-${i}`);
+                const pillMeter = document.getElementById(`pill-meter-${i}`);
+
+                const distKm = Math.round(dist / 10);
+                pillDist.textContent = planetState[i].reached ? '✓ ORBIT' : `${distKm} km`;
+                pillStatus.textContent = planetState[i].reached
+                    ? 'ORBIT READY'
+                    : dist < pd.orbitRadius * 1.45
+                        ? 'FINAL APPROACH'
+                        : dist < pd.orbitRadius * 2.8
+                            ? 'TRACKED'
+                            : 'DEEP SPACE';
+                pillMeter.style.width = `${getApproachRatio(pd, dist) * 100}%`;
+
+                pill.classList.toggle('reached', planetState[i].reached);
+                pill.classList.toggle('nearby', !planetState[i].reached && dist < pd.orbitRadius * 2.5);
+                pill.classList.toggle('active', i === nearestIdx);
+            });
+        }
+
+        function showMissionPanel(idx) {
+            if (activeMissionPlanetIdx === idx) return;
+            activeMissionPlanetIdx = idx;
+            const pd = PLANETS[idx];
+
+            document.getElementById('mp-dot').style.background = pd.hexColor;
+            document.getElementById('mp-dot').style.boxShadow = `0 0 10px ${pd.hexColor}`;
+            document.getElementById('mp-dot').style.color = pd.hexColor;
+            document.getElementById('mp-title').textContent = pd.name;
+            document.getElementById('mp-desc').textContent = pd.desc;
+
+            const statsEl = document.getElementById('mp-stats');
+            statsEl.innerHTML = `
+                <div class="mp-stat-row">
+                    <span class="mp-stat-label">OBTÍŽNOST</span>
+                    <span class="mp-stat-val" style="color:${pd.diffColor}">${pd.diff}</span>
+                </div>
+                <div class="mp-stat-row">
+                    <span class="mp-stat-label">ODMĚNA</span>
+                    <span class="mp-stat-val" style="color:#00ffff">${pd.reward}</span>
+                </div>
+                <div class="mp-stat-row">
+                    <span class="mp-stat-label">TYP MISE</span>
+                    <span class="mp-stat-val" style="color:#aabbee">${pd.type}</span>
+                </div>
+            `;
+
+            document.getElementById('mission-panel').classList.add('open');
+        }
+
+        function closeMissionPanel() {
+            activeMissionPlanetIdx = null;
+            document.getElementById('mission-panel').classList.remove('open');
+        }
+
+        // Launch button
+        document.getElementById('launch-btn').addEventListener('click', () => {
+            if (activeMissionPlanetIdx === null) return;
+            const pd = PLANETS[activeMissionPlanetIdx];
+            const el = document.getElementById('launch-btn');
+            el.textContent = 'WARP DRIVE AKTIVOVÁN…';
+            el.disabled = true;
+
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;
+                background:#000;z-index:9999;display:flex;align-items:center;
+                justify-content:center;opacity:0;transition:opacity 0.5s ease;`;
+            overlay.innerHTML = `<h1 style="color:#00ffff;font-family:'Orbitron',sans-serif;
+                letter-spacing:5px;text-shadow:0 0 30px #00ffff;">WARP DRIVE AKTIVOVÁN</h1>`;
+            document.body.appendChild(overlay);
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                setTimeout(() => {
+                    window.location.href = `spaceInvaders.html?map=${pd.mapIndex}`;
+                }, 600);
+            }, 10);
+        });
+
+        // ─────────────────────────────────────────────────────────
+        //  APPROACH INDICATOR
+        // ─────────────────────────────────────────────────────────
+        let approachTimeout = null;
+        function showApproachHint(planetName) {
+            const el = document.getElementById('approach-indicator');
+            document.getElementById('approach-text').textContent = `ORBIT DOSAŽENA › ${planetName} – Přistání povoleno`;
+            el.classList.add('visible');
+            if (approachTimeout) clearTimeout(approachTimeout);
+            approachTimeout = setTimeout(() => el.classList.remove('visible'), 5000);
+        }
+
+        // Orbit reached FX
+        function playOrbitFX() {
+            const el = document.getElementById('orbit-fx');
+            el.classList.remove('play');
+            void el.offsetWidth; // reflow
+            el.classList.add('play');
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  CLOCK
+        // ─────────────────────────────────────────────────────────
+        const clock = new THREE.Clock();
+        let totalTime = 0;
+        let collisionCooldown = 0;
+        const shipBankQuat = new THREE.Quaternion();
+        const shipPitchQuat = new THREE.Quaternion();
+        const shipRollAxis = new THREE.Vector3(0, 0, 1);
+        const shipPitchAxis = new THREE.Vector3(1, 0, 0);
+
+        // ─────────────────────────────────────────────────────────
+        //  UPDATE
+        // ─────────────────────────────────────────────────────────
+        function update(dt) {
+            totalTime += dt;
+            collisionCooldown = Math.max(0, collisionCooldown - dt);
+
+            const moveY = (keys['w'] || keys['arrowup'] ? 1 : 0) - (keys['s'] || keys['arrowdown'] ? 1 : 0);
+            const targetInputY = THREE.MathUtils.clamp(moveY, -1, 1);
+            travel.inputX += (0 - travel.inputX) * 10 * dt;
+            travel.inputY += (targetInputY - travel.inputY) * 8 * dt;
+
+            const yawInput = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+            const pitchInput = 0;
+            const forwardInput = (keys['shift'] ? 1 : 0) - (keys['control'] ? 1 : 0);
+            const braking = !!keys[' '];
+
+            travel.yawVelocity += yawInput * travel.turnAccel * dt;
+            travel.pitchVelocity += pitchInput * travel.turnAccel * dt;
+            const turnDamping = Math.exp(-travel.turnDamping * dt);
+            travel.yawVelocity *= turnDamping;
+            travel.pitchVelocity *= turnDamping;
+            travel.yawVelocity = THREE.MathUtils.clamp(travel.yawVelocity, -travel.maxTurnSpeed, travel.maxTurnSpeed);
+            travel.pitchVelocity = THREE.MathUtils.clamp(travel.pitchVelocity, -travel.maxTurnSpeed, travel.maxTurnSpeed);
+
+            travel.yaw += travel.yawVelocity * dt;
+            travel.pitch = THREE.MathUtils.clamp(travel.pitch + travel.pitchVelocity * dt, -1.15, 1.15);
+
+            const { forward, right, up } = getOrientationVectors();
+            const acceleration = new THREE.Vector3()
+                .addScaledVector(right, travel.inputX * travel.strafeThrust)
+                .addScaledVector(up, travel.inputY * travel.strafeThrust);
+
+            if (forwardInput > 0) {
+                acceleration.addScaledVector(forward, forwardInput * travel.forwardThrust);
+            } else if (forwardInput < 0) {
+                acceleration.addScaledVector(forward, forwardInput * travel.reverseThrust);
+            }
+
+            travel.velocity.addScaledVector(acceleration, dt);
+
+            const forwardSpeed = THREE.MathUtils.clamp(
+                travel.velocity.dot(forward),
+                -travel.maxReverseSpeed,
+                travel.maxForwardSpeed
+            );
+            const lateralVelocity = travel.velocity.clone().addScaledVector(forward, -travel.velocity.dot(forward));
+            const lateralSpeed = lateralVelocity.length();
+            if (lateralSpeed > travel.maxStrafeSpeed) {
+                lateralVelocity.multiplyScalar(travel.maxStrafeSpeed / lateralSpeed);
+            }
+            travel.velocity.copy(lateralVelocity).addScaledVector(forward, forwardSpeed);
+
+            const drag = Math.exp(-(braking ? travel.brakeDrag : travel.drag) * dt);
+            travel.velocity.multiplyScalar(drag);
+            if (braking && travel.velocity.length() < 4) {
+                travel.velocity.set(0, 0, 0);
+            }
+
+            travel.worldPos.addScaledVector(travel.velocity, dt);
+            travel.speed = travel.velocity.length();
+
+            const localStrafe = travel.velocity.dot(right);
+            const localLift = travel.velocity.dot(up);
+            const shipTargetX = THREE.MathUtils.clamp(-yawInput * 2.3 - travel.yawVelocity * 0.65 + localStrafe * 0.012, -5.5, 5.5);
+            const shipTargetY = THREE.MathUtils.clamp(localLift * 0.028 + travel.inputY * 1.3, -4.2, 4.2);
+
+            ship.targetX += (shipTargetX - ship.targetX) * 6 * dt;
+            ship.targetY += (shipTargetY - ship.targetY) * 6 * dt;
+            ship.position.x = ship.targetX;
+            ship.position.y = ship.targetY;
+            ship.position.z = 0;
+
+            const shipBank = -yawInput * 0.26 - travel.yawVelocity * 0.18;
+            const shipPitch = -travel.inputY * 0.12 - localLift * 0.0014;
+
+            const pulse = 0.85 + Math.sin(totalTime * 12) * 0.15;
+            const throttleVisual = Math.max(0, forwardInput) + (travel.speed / travel.maxForwardSpeed) * 0.6;
+            ship._engine.material.opacity = (0.55 + throttleVisual * 0.38) * pulse;
+            ship._engine.scale.y = 0.82 + pulse * 0.22 + throttleVisual * 0.34;
+
+            const sPos = starfield.geometry.attributes.position;
+            const starShift = travel.velocity.clone().multiplyScalar(-dt * 0.18);
+            for (let i = 0; i < sPos.count; i++) {
+                let x = sPos.getX(i) + starShift.x;
+                let y = sPos.getY(i) + starShift.y;
+                let z = sPos.getZ(i) + starShift.z;
+
+                if (x > 180) x -= 360;
+                if (x < -180) x += 360;
+                if (y > 180) y -= 360;
+                if (y < -180) y += 360;
+                if (z > 180) z -= 360;
+                if (z < -180) z += 360;
+
+                sPos.setXYZ(i, x, y, z);
+            }
+            sPos.needsUpdate = true;
+
+            const cameraTarget = ship.position.clone()
+                .addScaledVector(forward, -18)
+                .addScaledVector(up, 6)
+                .addScaledVector(right, ship.position.x * 0.15);
+            camera.position.lerp(cameraTarget, 1 - Math.exp(-4 * dt));
+
+            const targetFov = forwardInput > 0 ? 76 : 70;
+            camera.fov += (targetFov - camera.fov) * 2.8 * dt;
+            camera.updateProjectionMatrix();
+            const lookTarget = ship.position.clone().addScaledVector(forward, 90).addScaledVector(up, 3);
+            camera.lookAt(lookTarget);
+
+            shipBankQuat.setFromAxisAngle(shipRollAxis, shipBank);
+            shipPitchQuat.setFromAxisAngle(shipPitchAxis, shipPitch);
+            ship.quaternion
+                .copy(camera.quaternion)
+                .multiply(shipBankQuat)
+                .multiply(shipPitchQuat);
+
+            shipLight.position.copy(ship.position).add(new THREE.Vector3(0, 1, 2));
+
+            const shipWorld = travel.worldPos.clone();
+
+            // ── Obstacles updates & collisions ──
+            const shipRadius = 2.0;
+
+            obstacles.forEach(obs => {
+                const wave = totalTime * obs.userData.waveSpeed + obs.userData.waveOffset;
+                obs.position.x = obs.userData.worldPos.x - shipWorld.x + Math.sin(wave) * obs.userData.waveAmpX;
+                obs.position.y = obs.userData.worldPos.y - shipWorld.y + Math.cos(wave * 1.2) * obs.userData.waveAmpY;
+                obs.position.z = obs.userData.worldPos.z - shipWorld.z;
+
+                if (obs.userData.worldPos.distanceTo(shipWorld) > 5200) {
+                    recycleDebris(obs, forward, right, up);
+                    obs.position.x = obs.userData.worldPos.x - shipWorld.x;
+                    obs.position.y = obs.userData.worldPos.y - shipWorld.y;
+                    obs.position.z = obs.userData.worldPos.z - shipWorld.z;
+                }
+
+                obs.rotation.x += obs.userData.rotX;
+                obs.rotation.y += obs.userData.rotY;
+                obs.rotation.z += obs.userData.rotZ;
+
+                // Collision detection
+                const cDist = obs.position.distanceTo(ship.position);
+                const hitDist = obs.userData.radius + shipRadius;
+
+                if (cDist < hitDist && collisionCooldown === 0) {
+                    collisionCooldown = 0.16;
+                    travel.velocity.multiplyScalar(0.84);
+                    const flash = document.getElementById('damage-flash');
+                    flash.classList.add('on');
+                    setTimeout(() => flash.classList.remove('on'), 150);
+
+                    const pushX = THREE.MathUtils.clamp(ship.position.x - obs.position.x, -1, 1);
+                    const pushY = THREE.MathUtils.clamp(ship.position.y - obs.position.y, -1, 1);
+                    travel.velocity.addScaledVector(right, pushX * 100);
+                    travel.velocity.addScaledVector(up, pushY * 100);
+                    obs.userData.worldPos.addScaledVector(forward, 280);
+                }
+            });
+
+            // ── Planet mesh positioning (world → camera-relative) ──
+            let nearestDist = Infinity;
+            let nearestIdx = -1;
+
+            PLANETS.forEach((pd, i) => {
+                const group = planetMeshes[i];
+
+                const rx = pd.worldPos.x - shipWorld.x;
+                const ry = pd.worldPos.y - shipWorld.y;
+                const rz = pd.worldPos.z - shipWorld.z;
+
+                group.position.set(rx, ry, rz);
+
+                // Self-rotation
+                group.children[0].rotation.y += 0.002;
+
+                // Atmosphere pulse
+                const atmPulse = 0.06 + Math.sin(totalTime * 1.5 + i) * 0.02;
+                group._atmMat.opacity = atmPulse;
+
+                // Distance (3D world)
+                const dist = shipWorld.distanceTo(pd.worldPos);
+
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestIdx = i;
+                }
+
+                const inOrbit = dist < pd.orbitRadius;
+                const nearby  = dist < pd.orbitRadius * 2.8;
+
+                planetState[i].nearby = nearby;
+
+                // Orbit ring glow
+                group._orbitMat.opacity = inOrbit ? 0.22 : (nearby ? 0.12 : 0.04);
+                const orbitColor = planetState[i].reached ? 0x00ff88 : (inOrbit ? 0x00ffff : 0x00ff88);
+                group._orbitMat.color.setHex(orbitColor);
+
+                // Planet emissive boost when nearby
+                if (group.children[0].material) {
+                    group.children[0].material.emissiveIntensity = inOrbit ? 1.2 : (nearby ? 0.8 : 0.5);
+                }
+
+                // Trigger orbit reached
+                if (inOrbit && !planetState[i].reached) {
+                    planetState[i].reached = true;
+                    playOrbitFX();
+                    showApproachHint(pd.name);
+                    showMissionPanel(i);
+                }
+
+                // Auto-show panel when re-entering orbit
+                if (inOrbit && activeMissionPlanetIdx !== i) {
+                    showMissionPanel(i);
+                }
+            });
+
+            // Close panel if left orbit
+            if (activeMissionPlanetIdx !== null) {
+                const apd = PLANETS[activeMissionPlanetIdx];
+                const adist = shipWorld.distanceTo(apd.worldPos);
+                if (adist > apd.orbitRadius * 1.4) {
+                    closeMissionPanel();
+                }
+            }
+
+            // ── Nearest planet HUD ──
+            if (nearestIdx >= 0) {
+                document.getElementById('nearest-name').textContent = PLANETS[nearestIdx].name;
+                const distStr = Math.round(nearestDist / 10);
+                document.getElementById('nearest-dist').textContent =
+                    planetState[nearestIdx].reached ? '✓ ORBIT' : `${distStr} km`;
+
+                const nearestPlanet = PLANETS[nearestIdx];
+                const relativePos = new THREE.Vector3(
+                    nearestPlanet.worldPos.x - shipWorld.x,
+                    nearestPlanet.worldPos.y - shipWorld.y,
+                    nearestPlanet.worldPos.z - shipWorld.z
+                );
+                updateTargetCard(nearestPlanet, nearestDist, relativePos, planetState[nearestIdx].reached);
+            }
+
+            // ── Speed HUD ──
+            const speedPct = THREE.MathUtils.clamp(travel.speed / travel.maxForwardSpeed, 0, 1);
+            document.getElementById('speed-val').textContent = Math.round(travel.speed);
+            document.getElementById('speed-bar').style.width = `${speedPct * 100}%`;
+
+            // ── Pills ──
+            updatePills(shipWorld, nearestIdx);
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  RENDER LOOP
+        // ─────────────────────────────────────────────────────────
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.05);
+            update(dt);
+            renderer.render(scene, camera);
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  RESIZE
+        // ─────────────────────────────────────────────────────────
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ─────────────────────────────────────────────────────────
+        //  BOOT
+        // ─────────────────────────────────────────────────────────
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 800);
+            animate();
+        }, 900);
+    </script>
+</body>
+</html>

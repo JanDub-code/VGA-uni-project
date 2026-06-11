@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g transform="translate(0, 0)">
+    <!-- Polotranparentní záře za krystalem -->
+    <path d="M 128 16 L 16 110 L 100 160 L 128 240 L 156 160 L 240 110 Z" fill="#ffd700" opacity="0.3" filter="url(#glow)"/>
+
+    <!-- Hlavní Low Poly krystal / lucerna (bez pozadí) -->
+    <!-- Levá horní hrana -->
+    <path d="M 128 16 L 16 110 L 100 160 Z" fill="#FFC107" />
+    
+    <!-- Střední horní plocha (nejsvětlejší) -->
+    <path d="M 128 16 L 100 160 L 156 160 Z" fill="#FFECB3" />
+    
+    <!-- Pravá horní hrana -->
+    <path d="M 128 16 L 156 160 L 240 110 Z" fill="#FFA000" />
+    
+    <!-- Levá spodní hrana -->
+    <path d="M 100 160 L 16 110 L 128 240 Z" fill="#FF8F00" />
+    
+    <!-- Střední spodní plocha -->
+    <path d="M 100 160 L 156 160 L 128 240 Z" fill="#FF6F00" />
+    
+    <!-- Pravá spodní hrana -->
+    <path d="M 156 160 L 240 110 L 128 240 Z" fill="#E65100" />
+
+    <!-- Vnitřní nejzářivější fragment -->
+    <path d="M 128 60 L 70 128 L 128 145 Z" fill="#FFFFFF" opacity="0.9" />
+    <path d="M 128 60 L 128 145 L 186 128 Z" fill="#FFF8E1" opacity="0.9" />
+    <path d="M 128 145 L 70 128 L 128 190 Z" fill="#FFE082" opacity="0.9" />
+    <path d="M 128 145 L 186 128 L 128 190 Z" fill="#FFCA28" opacity="0.9" />
+  </g>
+</svg>
