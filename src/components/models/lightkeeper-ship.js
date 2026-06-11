@@ -1,4 +1,17 @@
-const SHIP_MODEL_URL = '/models/ships/spaceship.glb'
+import { assetUrl } from '../../services/assetPaths.js'
+
+const SHIP_MODEL_URL = assetUrl('models/ships/spaceship.glb')
+const SHIP_SCOUT_MODEL_URL = assetUrl('models/ships/spaceship-2.glb')
+const SHIP_RELIC_MODEL_URL = assetUrl('models/ships/spaceship-3.glb')
+
+function toModelKey(url) {
+    try {
+        return new URL(url, 'https://lightkeeper.local').pathname
+    } catch {
+        return url
+    }
+}
+
 const DEFAULT_EFFECT_LAYOUT = {
     engine: {
         position: [0, -0.22, 1.55],
@@ -15,8 +28,8 @@ const DEFAULT_EFFECT_LAYOUT = {
     ],
 }
 const SHIP_EFFECT_LAYOUTS = {
-    '/models/ships/spaceship.glb': DEFAULT_EFFECT_LAYOUT,
-    '/models/ships/spaceship-2.glb': {
+    [toModelKey(SHIP_MODEL_URL)]: DEFAULT_EFFECT_LAYOUT,
+    [toModelKey(SHIP_SCOUT_MODEL_URL)]: {
         engine: {
             position: [0, -0.02, 1.32],
             outer: { radius: 0.18, length: 0.95, z: -0.45 },
@@ -31,7 +44,7 @@ const SHIP_EFFECT_LAYOUTS = {
             { name: 'rcs-down-right', x: 0.42, y: -0.27, z: 0.84, dir: [0, -1, 0], surface: 'bottom', xRatio: 0.66, zRatio: 0.7, radius: 0.055, length: 0.24, glowScale: 0.15 },
         ],
     },
-    '/models/ships/spaceship-3.glb': {
+    [toModelKey(SHIP_RELIC_MODEL_URL)]: {
         engine: {
             position: [0, -0.12, 1.42],
             outer: { radius: 0.2, length: 0.98, z: -0.48 },
@@ -49,8 +62,7 @@ const SHIP_EFFECT_LAYOUTS = {
 }
 
 function getEffectLayout(modelUrl) {
-    const path = new URL(modelUrl || SHIP_MODEL_URL, window.location.origin).pathname
-    return SHIP_EFFECT_LAYOUTS[path] || DEFAULT_EFFECT_LAYOUT
+    return SHIP_EFFECT_LAYOUTS[toModelKey(modelUrl || SHIP_MODEL_URL)] || DEFAULT_EFFECT_LAYOUT
 }
 
 AFRAME.registerComponent('lk-ship-model', {

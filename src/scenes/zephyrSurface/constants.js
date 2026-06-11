@@ -1,6 +1,8 @@
-export const SURFACE_MODEL_URL = '/models/planets/earth-map.glb'
-export const ZOMBIE_MODEL_URL = '/models/enemies/Zombie.glb'
-export const BEACON_MODEL_URL = '/models/objects/Torch.glb'
+import { assetUrl } from '../../services/assetPaths.js'
+
+export const SURFACE_MODEL_URL = assetUrl('models/planets/earth-map.glb')
+export const ZOMBIE_MODEL_URL = assetUrl('models/enemies/Zombie.glb')
+export const BEACON_MODEL_URL = assetUrl('models/objects/Torch.glb')
 export const DAY_SKY_COLOR = '#145599'
 export const NIGHT_SKY_COLOR = '#06162c'
 export const SUN_COLOR = '#fff2b8'

@@ -1,3 +1,5 @@
+import { assetUrl, gltfModelUrl } from '../services/assetPaths.js'
+
 const IDLE_CLIP = 'Idle'
 const SELECT_CLIP = 'HipHop'
 const SELECT_DANCE_MS = 2600
@@ -74,11 +76,11 @@ export function createCharacterDisplayScene(scene, character) {
   backdrop.setAttribute('position', '0 0.15 -12.8')
   backdrop.setAttribute('width', '46')
   backdrop.setAttribute('height', '36.8')
-  backdrop.setAttribute('material', 'src: /img/hangar.png; shader: flat; transparent: true; opacity: 1; side: double')
+  backdrop.setAttribute('material', `src: ${assetUrl('img/hangar.png')}; shader: flat; transparent: true; opacity: 1; side: double`)
   root.appendChild(backdrop)
 
   const platform = document.createElement('a-entity')
-  platform.setAttribute('gltf-model', 'url(/models/environments/platform.glb)')
+  platform.setAttribute('gltf-model', gltfModelUrl('models/environments/platform.glb'))
   platform.setAttribute('position', '0 -1.82 -2.6')
   platform.setAttribute('scale', '0.42 0.42 0.42')
   root.appendChild(platform)

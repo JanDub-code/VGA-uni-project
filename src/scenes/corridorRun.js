@@ -3,6 +3,7 @@ import { audioService } from '../services/audioService.js'
 import { gamepadService } from '../services/gamepadService.js'
 import { gamepadNavService } from '../services/gamepadNavService.js'
 import { springValue } from '../services/motionDynamics.js'
+import { assetUrl } from '../services/assetPaths.js'
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
 const rand = (min, max) => min + Math.random() * (max - min)
@@ -17,7 +18,7 @@ const GAME_STATES = {
   VICTORY: 'VICTORY',
 }
 
-const ASTEROID_MODEL_URL = '/models/objects/asteroid.glb'
+const ASTEROID_MODEL_URL = assetUrl('models/objects/asteroid.glb')
 const POWERUP_TYPES = ['shield', 'rapid', 'score']
 const STAR_POWER_DURATION = 10
 

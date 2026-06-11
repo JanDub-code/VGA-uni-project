@@ -1,4 +1,5 @@
 import { gameState } from '../services/gameState.js'
+import { gltfModelUrl } from '../services/assetPaths.js'
 
 export function createMenuDisplayScene(scene) {
   const root = document.createElement('a-entity')
@@ -47,13 +48,13 @@ export function createMenuDisplayScene(scene) {
   root.appendChild(bgPlanet)
 
   const planetEnv = document.createElement('a-entity')
-  planetEnv.setAttribute('gltf-model', 'url(/models/environments/planet-env.glb)')
+  planetEnv.setAttribute('gltf-model', gltfModelUrl('models/environments/planet-env.glb'))
   planetEnv.setAttribute('position', '0 -5 -10')
   planetEnv.setAttribute('scale', '0.55 0.55 0.55')
   root.appendChild(planetEnv)
 
   const platform = document.createElement('a-entity')
-  platform.setAttribute('gltf-model', 'url(/models/environments/platform.glb)')
+  platform.setAttribute('gltf-model', gltfModelUrl('models/environments/platform.glb'))
   platform.setAttribute('position', '0 -5 -10')
   platform.setAttribute('scale', '0.55 0.55 0.55')
   root.appendChild(platform)

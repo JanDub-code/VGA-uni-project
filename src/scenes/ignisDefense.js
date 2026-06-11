@@ -2,6 +2,7 @@ import { getPlanet } from '../services/gameState.js'
 import { audioService } from '../services/audioService.js'
 import { gamepadService } from '../services/gamepadService.js'
 import { gamepadNavService } from '../services/gamepadNavService.js'
+import { assetUrl } from '../services/assetPaths.js'
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
 const rand = (min, max) => min + Math.random() * (max - min)
@@ -20,13 +21,13 @@ const GAME_STATES = {
   VICTORY: 'VICTORY',
 }
 
-const ENEMY_MODEL_URL = '/models/ships/alien-green-spaceship.glb'
+const ENEMY_MODEL_URL = assetUrl('models/ships/alien-green-spaceship.glb')
 const ENEMY_MODEL_TARGET_SIZE = 2.85
 const ENEMY_HIT_RADIUS = 1.45
-const BOMB_MODEL_URL = '/models/objects/Spike Mine.glb'
+const BOMB_MODEL_URL = assetUrl('models/objects/Spike Mine.glb')
 const BOMB_MODEL_TARGET_SIZE = 2.0
 const BOMB_HIT_RADIUS = 1.4
-const VOLCANO_MODEL_URL = '/models/environments/Volcano.glb'
+const VOLCANO_MODEL_URL = assetUrl('models/environments/Volcano.glb')
 const VOLCANO_TARGET_HEIGHT = 18
 const VOLCANO_LAVA_KEY_COLOR = '#ff4e00'
 const VOLCANO_LAVA_WARM_COLOR = '#ff6a00'

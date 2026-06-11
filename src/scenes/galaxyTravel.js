@@ -3,6 +3,7 @@ import { audioService } from '../services/audioService.js'
 import { gamepadService } from '../services/gamepadService.js'
 import { gamepadNavService } from '../services/gamepadNavService.js'
 import { expSmoothingFactor, springValue } from '../services/motionDynamics.js'
+import { assetUrl } from '../services/assetPaths.js'
 import { createHangarController } from './galaxy/hangarController.js'
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
@@ -24,7 +25,7 @@ const STATION_DISCOVERY_MARKER_OFFSET = { x: 10, y: -65, z: -5 }
 const SPACE_OBJECT_MODELS = [
   {
     type: 'asteroid',
-    url: '/models/objects/asteroid.glb',
+    url: assetUrl('models/objects/asteroid.glb'),
     count: 88,
     sizeMin: 5,
     sizeMax: 42,
@@ -32,7 +33,7 @@ const SPACE_OBJECT_MODELS = [
   },
   {
     type: 'asteroid-field',
-    url: '/models/objects/asteroid-group.glb',
+    url: assetUrl('models/objects/asteroid-group.glb'),
     count: 20,
     sizeMin: 7,
     sizeMax: 34,

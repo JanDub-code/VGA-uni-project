@@ -1,5 +1,6 @@
 import { buildCharacterSelectShell } from './characterSelectView.js'
 import { buildMainHeroCard } from './mainHeroCard.js'
+import { assetUrl } from '../services/assetPaths.js'
 
 export function buildAppShell({ showDebugControls = false } = {}) {
   return `
@@ -15,7 +16,7 @@ export function buildAppShell({ showDebugControls = false } = {}) {
   <div id="main-menu" class="ui-layer">
     <div class="mm-topbar">
       <div class="mm-logo">
-        <img class="mm-logo-icon" src="/favicon.svg" alt="LightKeeper logo" />
+        <img class="mm-logo-icon" src="${assetUrl('favicon.svg')}" alt="LightKeeper logo" />
         <div class="mm-logo-name">Light<span class="mm-logo-accent">Keeper</span></div>
       </div>
       <div class="mm-topbar-actions">
@@ -152,7 +153,7 @@ export function buildAppShell({ showDebugControls = false } = {}) {
     <div id="hangar-panel" class="hidden" aria-modal="true" role="dialog">
       <div class="hangar-topbar">
         <div class="mm-logo">
-          <img class="mm-logo-icon" src="/favicon.svg" alt="LightKeeper logo" />
+          <img class="mm-logo-icon" src="${assetUrl('favicon.svg')}" alt="LightKeeper logo" />
           <div class="mm-logo-name">Hangár <span class="mm-logo-accent">Lucerny</span></div>
         </div>
         <button class="mm-icon-btn hangar-close" id="hangar-close-btn" type="button" aria-label="Zavřít hangár">ZAVŘÍT</button>
@@ -366,7 +367,7 @@ export function buildAppShell({ showDebugControls = false } = {}) {
                 </div>
 
                 <div class="controller-diagram" aria-hidden="true">
-                  <img src="/img/gamepad-lowpoly.png" alt="gamepad" class="controller-img" />
+                  <img src="${assetUrl('img/gamepad-lowpoly.png')}" alt="gamepad" class="controller-img" />
                 </div>
 
                 <div class="controller-bindings right">

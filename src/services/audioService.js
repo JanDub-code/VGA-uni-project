@@ -1,6 +1,8 @@
-const ENGINE_LOOP_URL = '/sounds/spacecraft-engine-loop.mp3'
+import { assetUrl } from './assetPaths.js'
+
+const ENGINE_LOOP_URL = assetUrl('sounds/spacecraft-engine-loop.mp3')
 const MUSIC_TRACKS = {
-  galaxy: '/sounds/singularity_action.mp3',
+  galaxy: assetUrl('sounds/singularity_action.mp3'),
 }
 
 function clamp(value, min, max) {

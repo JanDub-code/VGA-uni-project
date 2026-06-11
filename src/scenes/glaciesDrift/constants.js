@@ -1,3 +1,19 @@
+import { assetUrl } from '../../services/assetPaths.js'
+
+const DARK_TOWER_ASSET = assetUrl('models/objects/darkTower.glb')
+const DEFENDING_DRONE_ASSET = assetUrl('models/objects/defending_drone.glb')
+const ICE_CRYSTAL_ASSET = assetUrl('models/objects/ice_crystal.glb')
+const ICE_CRYSTAL_2_ASSET = assetUrl('models/objects/ice_crystal2.glb')
+const ICE_CRYSTAL_3_ASSET = assetUrl('models/objects/ice_crystal3.glb')
+const ICE_ROCK_ASSET = assetUrl('models/objects/ice_rock.glb')
+const CLIFF_ROCK_ASSET = assetUrl('models/objects/kenney-nature/cliff_rock.glb')
+const CLIFF_STONE_ASSET = assetUrl('models/objects/kenney-nature/cliff_stone.glb')
+const ROCK_LARGE_A_ASSET = assetUrl('models/objects/kenney-nature/rock_largeA.glb')
+const ROCK_LARGE_B_ASSET = assetUrl('models/objects/kenney-nature/rock_largeB.glb')
+const ROCK_TALL_A_ASSET = assetUrl('models/objects/kenney-nature/rock_tallA.glb')
+const ROCK_TALL_B_ASSET = assetUrl('models/objects/kenney-nature/rock_tallB.glb')
+const STONE_LARGE_A_ASSET = assetUrl('models/objects/kenney-nature/stone_largeA.glb')
+
 export const GAME_STATES = {
   PLAYING: 'PLAYING',
   PAUSED: 'PAUSED',
@@ -75,7 +91,7 @@ export const TOWER_LAYOUT = [
 ]
 
 export const TOWER_VISUAL = {
-  asset: '/models/objects/darkTower.glb',
+  asset: DARK_TOWER_ASSET,
   modelScale: 5,
   radius: 10,
   height: 34,
@@ -97,7 +113,7 @@ export const PROJECTILE = {
 }
 
 export const DRONE = {
-  asset: '/models/objects/defending_drone.glb',
+  asset: DEFENDING_DRONE_ASSET,
   perTower: 2,
   hp: 2,
   hitRadius: 2.6,
@@ -378,7 +394,7 @@ export const SHIP_BEAM_STYLES = {
 
 export const ICE_PROP_PROFILES = [
   {
-    asset: '/models/objects/ice_crystal.glb',
+    asset: ICE_CRYSTAL_ASSET,
     family: 'ice',
     role: 'medium-crystal',
     weight: 16,
@@ -392,7 +408,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.15,
   },
   {
-    asset: '/models/objects/ice_crystal2.glb',
+    asset: ICE_CRYSTAL_2_ASSET,
     family: 'ice',
     role: 'large-crystal',
     weight: 10,
@@ -406,7 +422,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.16,
   },
   {
-    asset: '/models/objects/ice_crystal3.glb',
+    asset: ICE_CRYSTAL_3_ASSET,
     family: 'ice',
     role: 'sharp-crystal',
     weight: 14,
@@ -420,7 +436,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.14,
   },
   {
-    asset: '/models/objects/ice_rock.glb',
+    asset: ICE_ROCK_ASSET,
     family: 'ice',
     role: 'ice-boulder',
     weight: 20,
@@ -434,7 +450,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.055,
   },
   {
-    asset: '/models/objects/kenney-nature/rock_largeA.glb',
+    asset: ROCK_LARGE_A_ASSET,
     family: 'kenney-rock',
     role: 'rounded-boulder',
     weight: 8,
@@ -448,7 +464,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.04,
   },
   {
-    asset: '/models/objects/kenney-nature/rock_largeB.glb',
+    asset: ROCK_LARGE_B_ASSET,
     family: 'kenney-rock',
     role: 'rounded-boulder',
     weight: 8,
@@ -462,7 +478,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.04,
   },
   {
-    asset: '/models/objects/kenney-nature/rock_tallA.glb',
+    asset: ROCK_TALL_A_ASSET,
     family: 'kenney-rock',
     role: 'tall-boulder',
     weight: 6,
@@ -476,7 +492,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.035,
   },
   {
-    asset: '/models/objects/kenney-nature/rock_tallB.glb',
+    asset: ROCK_TALL_B_ASSET,
     family: 'kenney-rock',
     role: 'tall-boulder',
     weight: 6,
@@ -490,7 +506,7 @@ export const ICE_PROP_PROFILES = [
     emissiveIntensity: 0.035,
   },
   {
-    asset: '/models/objects/kenney-nature/stone_largeA.glb',
+    asset: STONE_LARGE_A_ASSET,
     family: 'kenney-stone',
     role: 'stone-boulder',
     weight: 8,
@@ -506,47 +522,47 @@ export const ICE_PROP_PROFILES = [
 ]
 
 export const ICE_COLLISION_PROFILES = {
-  '/models/objects/ice_crystal.glb': {
+  [ICE_CRYSTAL_ASSET]: {
     radiusXZ: 3.98,
     center: { x: 0.08, z: 0.22 },
   },
-  '/models/objects/ice_crystal2.glb': {
+  [ICE_CRYSTAL_2_ASSET]: {
     radiusXZ: 6.42,
     center: { x: 0.64, z: 0.72 },
   },
-  '/models/objects/ice_crystal3.glb': {
+  [ICE_CRYSTAL_3_ASSET]: {
     radiusXZ: 4.51,
     center: { x: 0.14, z: 0.09 },
   },
-  '/models/objects/ice_rock.glb': {
+  [ICE_ROCK_ASSET]: {
     radiusXZ: 7.72,
     center: { x: -0.14, z: 0.68 },
   },
-  '/models/objects/kenney-nature/cliff_rock.glb': {
+  [CLIFF_ROCK_ASSET]: {
     radiusXZ: 0.5,
     center: { x: 0, z: 0.42 },
   },
-  '/models/objects/kenney-nature/cliff_stone.glb': {
+  [CLIFF_STONE_ASSET]: {
     radiusXZ: 0.5,
     center: { x: 0, z: 0.42 },
   },
-  '/models/objects/kenney-nature/rock_largeA.glb': {
+  [ROCK_LARGE_A_ASSET]: {
     radiusXZ: 0.51,
     center: { x: 0, z: 0 },
   },
-  '/models/objects/kenney-nature/rock_largeB.glb': {
+  [ROCK_LARGE_B_ASSET]: {
     radiusXZ: 0.51,
     center: { x: 0, z: 0 },
   },
-  '/models/objects/kenney-nature/rock_tallA.glb': {
+  [ROCK_TALL_A_ASSET]: {
     radiusXZ: 0.49,
     center: { x: 0, z: 0 },
   },
-  '/models/objects/kenney-nature/rock_tallB.glb': {
+  [ROCK_TALL_B_ASSET]: {
     radiusXZ: 0.39,
     center: { x: 0, z: 0 },
   },
-  '/models/objects/kenney-nature/stone_largeA.glb': {
+  [STONE_LARGE_A_ASSET]: {
     radiusXZ: 0.51,
     center: { x: 0, z: 0 },
   },

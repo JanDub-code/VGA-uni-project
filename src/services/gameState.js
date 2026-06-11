@@ -1,6 +1,8 @@
-const ZEPHYR_MODEL_URL = '/models/planets/earth.glb'
-const IGNIS_MODEL_URL = '/models/planets/magma.glb'
-const ANOMALY_MODEL_URL = '/models/planets/orbion.glb'
+import { assetUrl } from './assetPaths.js'
+
+const ZEPHYR_MODEL_URL = assetUrl('models/planets/earth.glb')
+const IGNIS_MODEL_URL = assetUrl('models/planets/magma.glb')
+const ANOMALY_MODEL_URL = assetUrl('models/planets/orbion.glb')
 const DEFAULT_SHIP_SKIN_ID = 'keeper-default'
 const DEFAULT_CHARACTER_ID = 'david'
 
@@ -9,8 +11,8 @@ export const CHARACTERS = [
     id: 'david',
     name: 'David',
     role: 'Pilot / Obránce',
-    portraitUrl: '/img/david.png',
-    modelUrl: '/models/characters/david.glb',
+    portraitUrl: assetUrl('img/david.png'),
+    modelUrl: assetUrl('models/characters/david.glb'),
     accentColor: '#00d8ff',
     stats: [
       { label: 'Rychlost letu', value: '+12%', color: '#ffaa00' },
@@ -23,8 +25,8 @@ export const CHARACTERS = [
     id: 'ivo',
     name: 'Ivo',
     role: 'Inženýr / Průzkumník',
-    portraitUrl: '/img/ivo.png',
-    modelUrl: '/models/characters/ivo.glb',
+    portraitUrl: assetUrl('img/ivo.png'),
+    modelUrl: assetUrl('models/characters/ivo.glb'),
     accentColor: '#9b30ff',
     stats: [
       { label: 'Rychlost oprav', value: '+15%', color: '#ffaa00' },
@@ -39,7 +41,7 @@ export const SHIP_SKINS = [
   {
     id: DEFAULT_SHIP_SKIN_ID,
     name: 'Lucerna Strážce',
-    modelUrl: '/models/ships/spaceship.glb',
+    modelUrl: assetUrl('models/ships/spaceship.glb'),
     role: 'Vyvážený hlídkový plášť',
     desc: 'Původní loď posledního Strážce. Drží klidnou stopu v rychlých obratech, odpouští chyby při přiblížení k orbitě a nechává pilotovi dost prostoru na korekce.',
     hangarStats: [
@@ -53,7 +55,7 @@ export const SHIP_SKINS = [
   {
     id: 'keeper-scout',
     name: 'Průzkumník Zephyru',
-    modelUrl: '/models/ships/spaceship-2.glb',
+    modelUrl: assetUrl('models/ships/spaceship-2.glb'),
     role: 'Lehký průzkumný rám',
     desc: 'Ostrý a lehký plášť pro piloty, kteří chtějí rychle měnit výšku a číst proudy kolem planet. Nejlépe funguje při svižném průletu mezi stanicemi a prstenci.',
     hangarStats: [
@@ -67,7 +69,7 @@ export const SHIP_SKINS = [
   {
     id: 'keeper-relic',
     name: 'Relikvie Řádu',
-    modelUrl: '/models/ships/spaceship-3.glb',
+    modelUrl: assetUrl('models/ships/spaceship-3.glb'),
     role: 'Archivní těžší konstrukce',
     desc: 'Obnovený návrh starých Strážců s pevnějším trupem a klidnějším profilem letu. Není tak hravý jako průzkumník, ale působí jistě při dlouhých přesunech v temných sektorech.',
     hangarStats: [
@@ -87,7 +89,7 @@ export const STATIONS = [
     type: 'HANGÁR',
     worldPos: { x: -760, y: 260, z: -1500 },
     dockRadius: 185,
-    model: '/models/stations/space-station.glb',
+    model: assetUrl('models/stations/space-station.glb'),
     color: '#00ffff',
     desc: 'Servisní uzel z dob, kdy Řád Strážců hlídal světelné trasy Majáku. V paměti stanice zůstaly konstrukční vzory starých Luceren.',
     rewardSkinId: 'keeper-scout',
@@ -98,7 +100,7 @@ export const STATIONS = [
     type: 'ARCHIV',
     worldPos: { x: 1720, y: -180, z: -2500 },
     dockRadius: 170,
-    model: '/models/stations/space-station.glb',
+    model: assetUrl('models/stations/space-station.glb'),
     color: '#ffd700',
     desc: 'Tichý archiv zachytil poslední signály před pádem Majáku. Část dat se odemkne až s rostoucím jasem Lucerny.',
     rewardSkinId: 'keeper-relic',
@@ -109,7 +111,7 @@ export const STATIONS = [
     type: 'RELÉ',
     worldPos: { x: -2700, y: -260, z: -4100 },
     dockRadius: 160,
-    model: '/models/stations/space-station.glb',
+    model: assetUrl('models/stations/space-station.glb'),
     color: '#9b30ff',
     desc: 'Relé kdysi vedlo lodě bezpečnými proudy světla. Teď pulzuje mezi signálem Majáku a šumem Anomálie.',
     rewardSkinId: null,

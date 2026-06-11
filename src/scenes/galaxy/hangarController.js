@@ -1,5 +1,6 @@
 import { SHIP_SKINS, gameState } from '../../services/gameState.js'
 import { gamepadNavService } from '../../services/gamepadNavService.js'
+import { assetUrl, gltfModelUrl } from '../../services/assetPaths.js'
 
 function createEntity(tag, attrs = {}, parent) {
   const el = document.createElement(tag)
@@ -197,11 +198,11 @@ export function createHangarController(host) {
         position: '0 0.15 -12.8',
         width: '46',
         height: '36.8',
-        material: 'src: /img/hangar.png; shader: flat; transparent: true; opacity: 1; side: double',
+        material: `src: ${assetUrl('img/hangar.png')}; shader: flat; transparent: true; opacity: 1; side: double`,
       }, this.previewRoot)
 
       createEntity('a-entity', {
-        'gltf-model': 'url(/models/environments/platform.glb)',
+        'gltf-model': gltfModelUrl('models/environments/platform.glb'),
         position: '0 -1.82 -2.6',
         scale: '0.42 0.42 0.42',
       }, this.previewRoot)

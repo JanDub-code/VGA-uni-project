@@ -47,7 +47,7 @@ export function buildCharacterSelectShell() {
     <div id="character-select-ui" class="ui-layer hidden">
       <div class="cs-topbar">
         <div class="mm-logo">
-          <img class="mm-logo-icon" src="/favicon.svg" alt="LightKeeper logo" />
+          <img class="mm-logo-icon" src="${assetUrl('favicon.svg')}" alt="LightKeeper logo" />
           <div class="mm-logo-name">Light<span class="mm-logo-accent">Keeper</span></div>
         </div>
         <button class="mm-icon-btn" id="characterBackButton" type="button">ZPĚT</button>
@@ -143,3 +143,4 @@ export function renderCharacterSelectView({ characters, selectedCharacter, onSel
     `).join('')
   }
 }
+import { assetUrl } from '../services/assetPaths.js'
